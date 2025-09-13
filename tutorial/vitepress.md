@@ -180,7 +180,11 @@ git remote add origin git@github.com:yongwang12138/blog.git
 git push -u origin main
 ```
 
-### 5.3 设置工作流
+### 5.3 选择Github Actions
+
+![image-20250914014802047](vitepress/image-20250914014802047.png)
+
+### 5.4 设置工作流
 
 ![image-20250914011608843](vitepress/image-20250914011608843.png)
 
@@ -249,8 +253,6 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 ```
-
-
 
 ## 6. 设置Typora的图片路径
 
