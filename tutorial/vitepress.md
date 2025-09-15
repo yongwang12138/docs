@@ -261,3 +261,53 @@ jobs:
 :::
 
 ![image-20250913224949891](vitepress/image-20250913224949891.png)
+
+## 7. Markdown扩展
+
+### 代码组
+
+**输入**
+
+~~~markdown
+::: code-group
+
+```yaml [GitHub]
+Host github.com
+	HostName github.com
+	User git
+	IdentityFile ~/.ssh/github_id_ed25519
+	PubkeyAcceptedKeyTypes ssh-ed25519
+```
+
+```yaml [Gitee]
+Host gitee.com
+	HostName gitee.com
+	User git
+	IdentityFile ~/.ssh/gitee_id_ed25519
+	PubkeyAcceptedKeyTypes ssh-ed25519
+```
+
+:::
+~~~
+
+**输出**
+
+::: code-group
+
+```yaml [GitHub]
+Host github.com
+	HostName github.com
+	User git
+	IdentityFile ~/.ssh/github_id_ed25519
+	PubkeyAcceptedKeyTypes ssh-ed25519
+```
+
+```yaml [Gitee]
+Host gitee.com
+	HostName gitee.com
+	User git
+	IdentityFile ~/.ssh/gitee_id_ed25519
+	PubkeyAcceptedKeyTypes ssh-ed25519
+```
+
+:::

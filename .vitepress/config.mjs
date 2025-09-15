@@ -12,9 +12,12 @@ export default defineConfig({
     nav: [
       { text: '主页', link: '/' },
       { text: '示例', link: '/markdown-examples' },
-      { text: '教程', items: [
-        { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
-      ] }
+      {
+        text: '教程', items: [
+          { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
+          { text: 'Git使用教程', link: '/tutorial/git' },
+        ]
+      }
     ],
 
     // 右侧导航栏
