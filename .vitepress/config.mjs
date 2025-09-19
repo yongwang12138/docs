@@ -12,6 +12,7 @@ export default defineConfig({
     nav: [
       { text: '主页', link: '/' },
       { text: '示例', link: '/markdown-examples' },
+      { text: 'Flutter', link: '/' },
       {
         text: '教程', items: [
           { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
@@ -24,8 +25,17 @@ export default defineConfig({
     outlineTitle: '文章目录',
     outline: [2, 6], // 目录显示2-6级标题
 
-    sidebar: false, // 关闭侧边栏
-    aside: "left", // 设置右侧侧边栏在左侧显示
+    sidebar: {
+      "/tutorial/": [
+        {
+            text: "教程",
+            items: [
+              { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
+              { text: 'Git使用教程', link: '/tutorial/git' },
+            ],
+        },
+      ],
+    },
 
     socialLinks: [
       { icon: 'github', link: 'https://github.com/yongwang12138' }
