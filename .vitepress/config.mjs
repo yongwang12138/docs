@@ -12,7 +12,7 @@ export default defineConfig({
     nav: [
       { text: '主页', link: '/' },
       { text: '示例', link: '/markdown-examples' },
-      { text: 'Flutter', link: '/' },
+      { text: 'Linux', link: '/' },
       {
         text: '教程', items: [
           { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
@@ -32,6 +32,7 @@ export default defineConfig({
             items: [
               { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
               { text: 'Git使用教程', link: '/tutorial/git' },
+              { text: 'Linux脚本自启动', link: '/tutorial/script-startup' },
             ],
         },
       ],

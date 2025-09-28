@@ -100,3 +100,13 @@ git pull
 # 还原暂存的内容
 git stash pop 
 ```
+
+## 5. Git提交
+
+```bash
+# 添加所有文件到暂存区
+git add .
+# 提交到本地仓库
+git commit -m "提交描述"
+```
+
