@@ -12,8 +12,8 @@
 - 设置git用户名和邮箱
 
   ```bash
-  git config user.name "unclewang12138"
-  git config user.email "unclewang12138@gmail.com"
+  git config --global user.name "unclewang12138"
+  git config --global user.email "unclewang12138@gmail.com"
   ```
 
 ## 2. Git的SSH配置
