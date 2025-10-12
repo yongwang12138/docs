@@ -17,6 +17,7 @@ export default defineConfig({
         text: '教程', items: [
           { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
           { text: 'Git使用教程', link: '/tutorial/git' },
+          { text: 'Beyond Compare', link: '/tutorial/compare' },
         ]
       }
     ],
@@ -32,7 +33,7 @@ export default defineConfig({
             items: [
               { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
               { text: 'Git使用教程', link: '/tutorial/git' },
-              { text: 'Linux脚本自启动', link: '/tutorial/script-startup' },
+              { text: 'Beyond Compare重置试用期', link: '/tutorial/compare' },
             ],
         },
       ],
