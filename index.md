@@ -16,13 +16,19 @@ hero:
     - theme: alt
       text: API 示例
       link: /api-examples
+    - theme: brand
+      text: View on GitHub
+      link: https://github.com/vuejs/vitepress
 
 features:
-  - title: 特性 A
-    details: 特性 A 的详细描述
-  - title: 特性 B
+  - icon: 📝
+    title: 专注内容
+    details: 只需 Markdown 即可轻松创建美观的文档站点。
+  - icon: 🛠️
+    title: 特性 B
     details: 特性 B 的详细描述
-  - title: 特性 C
+  - icon: 🚀
+    title: 特性 C
     details: 特性 C 的详细描述
 ---
 
