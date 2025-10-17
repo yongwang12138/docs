@@ -18,6 +18,7 @@ export default defineConfig({
           { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
           { text: 'Git使用教程', link: '/tutorial/git' },
           { text: 'Go环境搭建', link: '/tutorial/go' },
+          { text: '树莓派教程', link: '/tutorial/raspberrypi' },
           { text: 'Beyond Compare', link: '/tutorial/compare' },
         ]
       }
@@ -35,6 +36,7 @@ export default defineConfig({
               { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
               { text: 'Git使用教程', link: '/tutorial/git' },
               { text: 'Go环境搭建', link: '/tutorial/go' },
+              { text: '树莓派教程', link: '/tutorial/raspberrypi' },
               { text: 'Beyond Compare重置试用期', link: '/tutorial/compare' },
             ],
         },
