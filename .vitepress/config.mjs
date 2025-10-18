@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid(defineConfig({
   base: "/docs/",
   head: [["link", { rel: "icon", href: "/docs/logo.svg" }]],
   title: "Mars星球",
@@ -12,14 +13,15 @@ export default defineConfig({
     nav: [
       { text: '主页', link: '/' },
       { text: '示例', link: '/markdown-examples' },
-      { text: 'Linux', link: '/' },
+      { text: 'Linux', link: '/docs/linux/base' },
       {
         text: '教程', items: [
-          { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
-          { text: 'Git使用教程', link: '/tutorial/git' },
-          { text: 'Go环境搭建', link: '/tutorial/go' },
-          { text: '树莓派教程', link: '/tutorial/raspberrypi' },
-          { text: 'Beyond Compare', link: '/tutorial/compare' },
+          { text: 'VitePress博客搭建', link: '/docs/tutorial/vitepress' },
+          { text: 'Git使用教程', link: '/docs/tutorial/git' },
+          { text: 'Go环境搭建', link: '/docs/tutorial/go' },
+          { text: '树莓派教程', link: '/docs/tutorial/raspberrypi' },
+          { text: 'Beyond Compare', link: '/docs/tutorial/compare' },
+          { text: 'M3U8转MP4', link: '/docs/tutorial/m3u8' },
         ]
       }
     ],
@@ -29,15 +31,25 @@ export default defineConfig({
     outline: [2, 6], // 目录显示2-6级标题
 
     sidebar: {
-      "/tutorial/": [
+      "/docs/linux/": [
+        {
+            text: "Linux教程",
+            items: [
+              { text: 'Linux基础', link: '/docs/linux/base' },
+              { text: 'Linux配置固定IP', link: '/docs/linux/nmtui' },
+            ],
+        },
+      ],
+      "/docs/tutorial/": [
         {
             text: "教程",
             items: [
-              { text: 'VitePress博客搭建', link: '/tutorial/vitepress' },
-              { text: 'Git使用教程', link: '/tutorial/git' },
-              { text: 'Go环境搭建', link: '/tutorial/go' },
-              { text: '树莓派教程', link: '/tutorial/raspberrypi' },
-              { text: 'Beyond Compare重置试用期', link: '/tutorial/compare' },
+              { text: 'VitePress博客搭建', link: '/docs/tutorial/vitepress' },
+              { text: 'Git使用教程', link: '/docs/tutorial/git' },
+              { text: 'Go环境搭建', link: '/docs/tutorial/go' },
+              { text: '树莓派教程', link: '/docs/tutorial/raspberrypi' },
+              { text: 'Beyond Compare', link: '/docs/tutorial/compare' },
+              { text: 'M3U8转MP4', link: '/docs/tutorial/m3u8' },
             ],
         },
       ],
@@ -70,5 +82,10 @@ export default defineConfig({
         },
       },
     },
+  },
+
+  // 配置 Mermaid 全局选项（如主题、字体等）
+  mermaid: {
+    theme: 'white'
   }
-})
+}))

@@ -262,9 +262,7 @@ jobs:
 
 ![image-20250913224949891](vitepress/image-20250913224949891.png)
 
-## 7. Markdown扩展
-
-### 代码组
+## 7. 代码组
 
 **输入**
 
@@ -311,3 +309,36 @@ Host gitee.com
 ```
 
 :::
+
+## 8.安装 Mermaid 的插件
+
+```bash
+npm install vitepress-plugin-mermaid mermaid --save-dev
+```
+
+在 `config.mjs` 中引入并配置插件
+
+```js
+// .vitepress/config.mjs
+import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid' // 引入插件
+
+// 用 withMermaid 包裹原配置
+export default withMermaid(defineConfig({
+  // 你的原有配置（保持不变）
+  base: "/docs/",
+  head: [["link", { rel: "icon", href: "/docs/logo.svg" }]],
+  title: "Mars星球",
+  description: "A VitePress Site",
+  themeConfig: {
+    // ... 你的主题配置
+  },
+
+  // 可选：配置 Mermaid 全局选项（如主题、字体等）
+  mermaid: {
+    // 例如设置深色主题
+    theme: 'dark'
+  }
+}))
+```
+
