@@ -1,6 +1,6 @@
 # Linux脚本自启动
 
-## 1. 创建检测脚本
+## 1. 创建监控脚本
 
 ### 1.1 创建脚本文件
 
@@ -12,17 +12,27 @@ vim /home/code/check_service.sh
 #!/bin/bash
 
 # ==============================================
-# 配置区：每个程序的配置作为一组，用竖线分隔字段
-# 格式："程序名|启动命令(./程序名)|工作目录|程序日志文件(./log/程序名.log)"
+# 强制要求以 root 权限（sudo）运行脚本
 # ==============================================
+if [ "$(id -u)" -ne 0 ]; then
+  echo "错误：请使用 sudo 运行此脚本（sudo ./check_service.sh）" >&2
+  exit 1
+fi
+
+# ==============================================
+# 配置区：每个程序的配置作为一组，用竖线分隔字段
+# 格式："程序名|启动命令(./程序名)|工作目录(相对于监控脚本的路径)"
+# ==============================================
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)  # 监控脚本所在目录
 PROGRAMS=(
-  # 程序名 | 启动命令 | 工作目录 | 独立日志文件路径
-  "long_run|./long_run|/home/code/|./log/long_run.log"
-  "short_run|./short_run|/home/code/|./log/short_run.log"
+  # 程序名 | 启动命令 | 工作目录(相对于监控脚本的路径)
+  "jydvis|./start.sh|JydVIS-arm64"
+  "JydRecordManager|./start.sh|JydRECORDMANAGER-ARM-linux"
+  "SoftRecord|./start.sh|qt"
 )
 
 # 监控脚本自身的日志（记录启动/检测等系统信息）
-SCRIPT_LOG="/home/code/log/check_services.log"
+SCRIPT_LOG="$SCRIPT_DIR/log/check_services.log" 
 CHECK_INTERVAL=30
 
 
@@ -46,41 +56,71 @@ script_log() {
   echo "[$current_time] $1" >> "$SCRIPT_LOG"
 }
 
-# 检查并启动程序（使用程序独立日志）
+# 查找目录（支持有后缀和没有后缀的情况）
+find_program_dir() {
+  local prefix="$SCRIPT_DIR/$1"
+  local base_dir=$(dirname "$prefix")
+  local name_prefix=$(basename "$prefix")
+  
+  # 首先检查精确匹配的目录（没有后缀的情况）
+  if [ -d "$prefix" ]; then
+    echo "$prefix"
+    return 0
+  fi
+  
+  # 如果没有精确匹配，查找带后缀的目录
+  local matched_dir=$(find "$base_dir" -maxdepth 1 -type d -name "$name_prefix*" | head -n 1)
+  
+  if [ -n "$matched_dir" ] && [ -d "$matched_dir" ]; then
+    echo "$matched_dir"
+    return 0
+  else
+    script_log "警告：未找到匹配的目录 $prefix 或 $prefix*"
+    return 1
+  fi
+}
+
+# 检查并启动程序
 check_and_start() {
   local prog_name=$1
   local start_cmd=$2
-  local work_dir=$3
-  local prog_log=$4  # 程序专属日志文件（相对路径）
-
-  # 切换到工作目录后处理相对路径
-  if [ -n "$work_dir" ]; then
-    cd "$work_dir" || {
-      script_log "$prog_name 切换目录 $work_dir 失败"
-      return 1
-    }
+  local dir_prefix=$3
+  
+  # 动态查找目录（支持有后缀和没有后缀）
+  local work_dir=$(find_program_dir "$dir_prefix")
+  if [ $? -ne 0 ] || [ -z "$work_dir" ]; then
+    script_log "错误：未找到工作目录 $dir_prefix 或 $dir_prefix*"
+    return 1
+  fi
+  
+  # 检查工作目录是否存在
+  if [ ! -d "$work_dir" ]; then
+    script_log "错误：工作目录不存在 $work_dir"
+    return 1
   fi
 
-  # 确保程序日志的目录存在（相对路径转绝对路径处理）
-  local abs_prog_log=$(readlink -f "$prog_log")  # 转换为绝对路径
-  local prog_log_dir=$(dirname "$abs_prog_log")
-  ensure_dir "$prog_log_dir"
+  # 切换到工作目录
+  cd "$work_dir" || {
+    script_log "$prog_name 切换目录 $work_dir 失败"
+    return 1
+  }
 
   if pgrep -x "$prog_name" >/dev/null; then
-  	script_log "$prog_name 正在运行中"
+    script_log "$prog_name 正在运行中 (工作目录: $(basename "$work_dir"))"
   else
-    script_log "$prog_name 未运行，尝试启动..."
+    script_log "$prog_name 未运行，尝试启动... (工作目录: $(basename "$work_dir"))"
     
-    # 启动程序，输出写入程序专属日志（使用转换后的绝对路径）
-    $start_cmd >> "$abs_prog_log" 2>&1 &
+    # 以管理员权限启动程序
+    sudo $start_cmd &
     
-    # 等待程序启动
+    # 等待程序启动（避免检测过快导致误判）
     sleep 1
     
+    # 验证启动结果
     if pgrep -x "$prog_name" >/dev/null; then
-      script_log "$prog_name 启动成功，日志路径：$abs_prog_log"
+      script_log "$prog_name 启动成功"
     else
-      script_log "$prog_name 启动失败，日志路径：$abs_prog_log"
+      script_log "$prog_name 启动失败"
     fi
   fi
 }
@@ -92,13 +132,26 @@ check_and_start() {
 # 确保脚本自身日志目录存在
 ensure_dir "$(dirname "$SCRIPT_LOG")"
 script_log "监控脚本启动，检测间隔：$CHECK_INTERVAL 秒"
+script_log "监控脚本目录：$SCRIPT_DIR"
+
+# 记录找到的目录信息
+script_log "目录匹配信息："
+for prog in "${PROGRAMS[@]}"; do
+  IFS="|" read -r prog_name start_cmd dir_prefix <<< "$prog"
+  work_dir=$(find_program_dir "$dir_prefix")
+  if [ $? -eq 0 ]; then
+    script_log "  $dir_prefix -> $work_dir"
+  else
+    script_log "  $dir_prefix -> 未找到"
+  fi
+done
 
 while :; do
   script_log "===== 开始新一轮检测 ====="
   for prog in "${PROGRAMS[@]}"; do
     # 按竖线拆分字段
-    IFS="|" read -r prog_name start_cmd work_dir prog_log <<< "$prog"
-    check_and_start "$prog_name" "$start_cmd" "$work_dir" "$prog_log"
+    IFS="|" read -r prog_name start_cmd dir_prefix <<< "$prog"
+    check_and_start "$prog_name" "$start_cmd" "$dir_prefix"
   done
   script_log "===== 本轮检测结束 ====="
   
@@ -211,5 +264,130 @@ sudo systemctl enable check-service
 
 ```bash
 sudo systemctl status check-service
+```
+
+### 3.3 启动与服务管理
+
+```bash
+#!/bin/bash
+
+# ==============================================
+# 权限检测：必须以 sudo 运行
+# ==============================================
+if [ "$(id -u)" -ne 0 ]; then
+  echo -e "\033[31m错误：此脚本必须以管理员权限运行！\033[0m"
+  echo "请使用以下命令启动："
+  echo "  sudo ./start.sh"
+  exit 1
+fi
+
+
+# ==============================================
+# 配置参数
+# ==============================================
+SERVICE_NAME="check-service"
+SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+# 主脚本路径（默认与 start.sh 同目录）
+MAIN_SCRIPT=$(readlink -f "$(dirname "$0")/check_service.sh")
+
+
+# ==============================================
+# 检查主脚本是否存在
+# ==============================================
+check_main_script() {
+  echo -e "\n===== 检查主监控脚本 ====="
+  if [ -f "$MAIN_SCRIPT" ]; then
+    echo -e "找到主脚本：\033[32m$MAIN_SCRIPT\033[0m"
+  else
+    echo -e "\033[31m错误：未找到主脚本！\033[0m"
+    echo "预期路径：$MAIN_SCRIPT"
+    echo "请确保 check_service.sh 与 start.sh 在同一目录"
+    exit 1
+  fi
+}
+
+
+# ==============================================
+# 创建并配置 systemd 服务
+# ==============================================
+create_and_enable_service() {
+  echo -e "\n===== 配置自启动服务 ====="
+  if [ -f "$SERVICE_FILE" ]; then
+    echo -e "服务文件已存在：\033[33m$SERVICE_FILE\033[0m"
+    echo "跳过创建步骤"
+    return
+  fi
+
+  # 写入服务配置
+  cat > "$SERVICE_FILE" << EOF
+[Unit]
+Description=监控并自动重启指定服务（每30秒检测一次）
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=$MAIN_SCRIPT
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  # 刷新配置并启用自启动
+  systemctl daemon-reload
+  systemctl enable "$SERVICE_NAME"
+  
+  echo -e "服务文件创建成功：\033[32m$SERVICE_FILE\033[0m"
+  echo "已配置开机自启"
+}
+
+
+# ==============================================
+# 启动服务
+# ==============================================
+start_service() {
+  echo -e "\n===== 启动服务 ====="
+  if systemctl is-active --quiet "$SERVICE_NAME"; then
+    echo -e "\033[32m服务 $SERVICE_NAME 已在运行中\033[0m"
+    return
+  fi
+
+  # 启动服务并检查结果
+  systemctl start "$SERVICE_NAME"
+  if systemctl is-active --quiet "$SERVICE_NAME"; then
+    echo -e "\033[32m服务 $SERVICE_NAME 启动成功\033[0m"
+  else
+    echo -e "\033[31m服务 $SERVICE_NAME 启动失败！\033[0m"
+    echo "查看错误详情：sudo systemctl status $SERVICE_NAME"
+    exit 1
+  fi
+}
+
+
+# ==============================================
+# 显示服务状态
+# ==============================================
+show_status() {
+  echo -e "\n===== 服务当前状态 ====="
+  systemctl status "$SERVICE_NAME" --no-pager
+}
+
+
+# ==============================================
+# 主流程
+# ==============================================
+echo -e "===== 监控服务管理工具 ====="
+check_main_script
+create_and_enable_service
+start_service
+show_status
+
+echo -e "\n===== 操作完成 ====="
+echo "服务名称：$SERVICE_NAME"
+echo "常用命令："
+echo "  停止服务：sudo systemctl stop $SERVICE_NAME"
+echo "  重启服务：sudo systemctl restart $SERVICE_NAME"
+echo "  查看日志：sudo journalctl -u $SERVICE_NAME -f"
 ```
 

@@ -37,6 +37,7 @@ export default withMermaid(defineConfig({
             items: [
               { text: 'Linux基础', link: '/docs/linux/base' },
               { text: 'Linux配置固定IP', link: '/docs/linux/nmtui' },
+              { text: 'Linux识别U盘', link: '/docs/linux/usb-mount' },
             ],
         },
       ],
